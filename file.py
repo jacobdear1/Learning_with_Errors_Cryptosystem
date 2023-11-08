@@ -32,7 +32,7 @@ def encrypt(plaintext, public_key, q):
    # print("b",b.shape)
     # loops through each indivudal bit in the plaintext
     for bit in plaintext:
-        print(bit)
+        print("here",bit)
         m=300 # find out how to not define this, as this will change?
         # use a different r, generated here for each bit, random integer between 2 and m
         r = random.randint(2,m) # what is m tho?
@@ -53,7 +53,7 @@ def encrypt(plaintext, public_key, q):
         pt = int(bit * (q/2)) # need to check this, what happens if q is .5, do we floor or ceiling?
        # print(pt)
         b_prime += pt
-       # print("after",b_prime)
+        print("after",b_prime)
         b_prime = b_prime[0] 
        # print(b_prime[0])
         # appends the array and b value to a list
