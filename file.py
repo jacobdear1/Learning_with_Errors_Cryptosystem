@@ -12,7 +12,8 @@ def key_gen(m,n,q):
     # e is a matrix of size m x 1 that has random values from either (1,0,-1)
     e = np.random.choice([1,0,-1], (m,1))
     # calculate b = A.s + e
-    b = np.dot(A, s) + e
+    b = (np.dot(A, s) + e) % q
+    print(b)
 
     # A,B pub key
     public_key = (A,b)
@@ -58,6 +59,7 @@ def encrypt(plaintext, public_key, q):
         s_arrays.append(aT_1)
 
         # next perform the dot product using b
+        print(rT)
         b_prime = np.dot(rT, b)
        # print("here", b_prime)
         # then add pt * q/2
@@ -66,10 +68,10 @@ def encrypt(plaintext, public_key, q):
        # print(pt)
         b_prime += pt
         print("after",b_prime)
-        b_int = b_prime[0]
-        print(b_int[0])
-        b_i =(b_int[0] % q)
-        b_values.append(b_i)
+        #b_int = b_prime[0]
+       # print(b_int[0])
+        #b_i =(b_int[0] % q)
+        b_values.append(b_prime%q)
         # as the value is wrapped in a double set of square brackets, we undo this
         #b_prime_2 = b_prime[0] 
         #print(b_prime_2[0])
@@ -134,10 +136,10 @@ def crack3(ciphertext, public_key, q):
     return 4
     
 
-#if __name__ == '__main__':
+if __name__ == '__main__':
     # n =16, m =300, q =53
     res = encrypt(np.array([1,0,1,1,0,1,1,0,1,1,0,0,0,0,0,0,1,0,1,0]), key_gen(300,16,53), 53)
-    #print("resulting", (res))
+    print("resulting", (res))
 
     #array = np.array
    # res2 = decrypt(np.array([([23,3,2,3,3,3,3,3,3,33,3,3,4,5,5,6],23), ([23,3,32,3,3,3,3,3,3,33,3,3,4,5,5,6],33)],dtype='object'),key_gen(300,16,53), 53)
