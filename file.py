@@ -43,6 +43,8 @@ def encrypt(plaintext, public_key, q):
         #print(rT)
         # performs the dot product using the random vector and the public key
         aT = np.dot(rT,A)
+        # so the array is correctly formatted
+        aT_1 = aT[0]
         #print(aT)
 
         # next perform the dot product using b
@@ -54,13 +56,15 @@ def encrypt(plaintext, public_key, q):
        # print(pt)
         b_prime += pt
         print("after",b_prime)
-        b_prime = b_prime[0] 
-       # print(b_prime[0])
+        # as the value is wrapped in a double set of square brackets, we undo this
+        b_prime_2 = b_prime[0] 
+        print(b_prime_2[0])
+        b_prime_3 = b_prime_2[0]
         # appends the array and b value to a list
         print("reaches")
-        c.append([aT,(b_prime[0] % q)])
+        c.append([aT_1,(b_prime_3 % q)])
         print("goes here")
-    #print(c)
+    print(c)
     # convers the list into an array, this is the ciphertext
     ciphertext = np.array(c, dtype='object')
    # print(ciphertext)
@@ -84,7 +88,8 @@ def decrypt(ciphertext, private_key, q):
         print(v % q)
         # m' = b' -v
         print(val[1])
-        m_prime = val[1] - v
+        b_prime = val[1]
+        m_prime = b_prime - v
         print("m",m_prime[0])
 
         m = abs(0-m_prime)
@@ -110,9 +115,11 @@ def crack3(ciphertext, public_key, q):
     return 4
     
 
-#if __name__ == '__main__':
+if __name__ == '__main__':
     # n =16, m =300, q =53
-    #res = encrypt(np.array([1,0,1,1,0,1,1,0,1,1,0,0,0,0,0,0,1,0,1,0]), key_gen(300,16,53), 53)
-    #print("resulting", (res))
+    res = encrypt(np.array([1,0,1,1,0,1,1,0,1,1,0,0,0,0,0,0,1,0,1,0]), key_gen(300,16,53), 53)
+    print("resulting", (res))
     #array = np.array
    # res2 = decrypt(np.array([([23,3,2,3,3,3,3,3,3,33,3,3,4,5,5,6],23), ([23,3,32,3,3,3,3,3,3,33,3,3,4,5,5,6],33)],dtype='object'),key_gen(300,16,53), 53)
+    #for i in res:
+    #    print(i)
