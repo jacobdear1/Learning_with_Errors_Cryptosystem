@@ -57,7 +57,9 @@ def encrypt(plaintext, public_key, q):
         b_prime = b_prime[0] 
        # print(b_prime[0])
         # appends the array and b value to a list
+        print("reaches")
         c.append([aT,(b_prime[0] % q)])
+        print("goes here")
     #print(c)
     # convers the list into an array, this is the ciphertext
     ciphertext = np.array(c, dtype='object')
@@ -75,9 +77,10 @@ def decrypt(ciphertext, private_key, q):
         print(len(val[0]))
         # turn a' back into a numpy array to allow for the dot product
         a_prime_T = np.array(val[0])
-        print(a_prime_T)
+        print("here",a_prime_T)
         # v = a'T . s, then adding the mod q to it
         v = np.dot(a_prime_T, private_key) % q
+        print("makes it")
         print(v % q)
         # m' = b' -v
         print(val[1])
