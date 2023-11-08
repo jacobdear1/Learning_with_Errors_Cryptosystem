@@ -59,9 +59,8 @@ def encrypt(plaintext, public_key, q):
         s_arrays.append(aT_1)
 
         # next perform the dot product using b
-        print(rT)
         b_prime = np.dot(rT, b)
-       # print("here", b_prime)
+        print("here", b_prime%q)
         # then add pt * q/2
         #print("before",b_prime)
         pt = int(bit * (q/2)) # need to check this, what happens if q is .5, do we floor or ceiling?
@@ -71,7 +70,15 @@ def encrypt(plaintext, public_key, q):
         #b_int = b_prime[0]
        # print(b_int[0])
         #b_i =(b_int[0] % q)
-        b_values.append(b_prime%q)
+        b_prime %= q
+        # flattens the numpy array
+        b_int_f = b_prime.flatten()
+        print("b_int_f", b_int_f)
+        # then gets rid of the extra braces to allow for single element
+        b_int = int(''.join(map(str, b_int_f)))
+        print(b_int)
+        b_values.append(b_int)
+
         # as the value is wrapped in a double set of square brackets, we undo this
         #b_prime_2 = b_prime[0] 
         #print(b_prime_2[0])
