@@ -24,7 +24,16 @@ def key_gen(m,n,q):
 
 def encrypt(plaintext, public_key, q):
 
-    c = []
+    # Define the data type for the structured array
+    dtype = np.dtype([('array', np.ndarray), ('b', int)])
+
+    # Create a NumPy object-type array with pairs of arrays and an integer 'b'
+    array_length = len(plaintext)  # Define the length of the array, same as length of pt
+    ciphertext = np.empty(array_length, dtype=dtype) 
+
+    # empty arrays to allow for the values to be built as we find them
+    s_arrays = []
+    b_values = []
     # access the values of A, b from the public key passing in respectively
     A = public_key[0]
    # print("A", A.shape)
@@ -46,6 +55,7 @@ def encrypt(plaintext, public_key, q):
         # so the array is correctly formatted
         aT_1 = aT[0]
         #print(aT)
+        s_arrays.append(aT_1)
 
         # next perform the dot product using b
         b_prime = np.dot(rT, b)
@@ -56,20 +66,27 @@ def encrypt(plaintext, public_key, q):
        # print(pt)
         b_prime += pt
         print("after",b_prime)
-        b_int = b_prime.astype(int)
-        print(b_int)
+        b_int = b_prime[0]
+        print(b_int[0])
+        b_i =(b_int[0] % q)
+        b_values.append(b_i)
         # as the value is wrapped in a double set of square brackets, we undo this
         #b_prime_2 = b_prime[0] 
         #print(b_prime_2[0])
         #b_prime_3 = b_prime_2[0]
         # appends the array and b value to a list
         print("reaches")
-        c.append([aT_1,(b_int % q)])
+        #c =np.append(c,[aT_1,(b_i % q)])
         print("goes here")
-    print(c)
+
+    # assigns the generated values to the structured array
+    ciphertext['array'] = s_arrays
+    ciphertext ['b'] = b_values
+    print("c",ciphertext)
+
     # convers the list into an array, this is the ciphertext
-    ciphertext = np.array(c, dtype='object')
-   # print(ciphertext)
+    #ciphertext = np.array(c, dtype='object')
+    #print("ci",ciphertext)
     # this will have the same number of values as the ciphertext, as one corresponds to this
     return ciphertext
 
@@ -117,10 +134,11 @@ def crack3(ciphertext, public_key, q):
     return 4
     
 
-if __name__ == '__main__':
+#if __name__ == '__main__':
     # n =16, m =300, q =53
     res = encrypt(np.array([1,0,1,1,0,1,1,0,1,1,0,0,0,0,0,0,1,0,1,0]), key_gen(300,16,53), 53)
-    print("resulting", (res))
+    #print("resulting", (res))
+
     #array = np.array
    # res2 = decrypt(np.array([([23,3,2,3,3,3,3,3,3,33,3,3,4,5,5,6],23), ([23,3,32,3,3,3,3,3,3,33,3,3,4,5,5,6],33)],dtype='object'),key_gen(300,16,53), 53)
     #for i in res:
