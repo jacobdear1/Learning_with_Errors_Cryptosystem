@@ -15,12 +15,12 @@ def key_gen(m,n,q):
     b = np.dot(A, s) + e
 
     # A,B pub key
-    public_key = (A,b)
+    #public_key = (A,b)
 
     # e is private key
-    #private_key = e
+    private_key = s
 
-    return public_key
+    return private_key
 
 def encrypt(plaintext, public_key, q):
 
@@ -54,10 +54,10 @@ def encrypt(plaintext, public_key, q):
        # print(pt)
         b_prime += pt
        # print("after",b_prime)
-        b_prime = b_prime[0]
+        b_prime = b_prime[0] 
        # print(b_prime[0])
         # appends the array and b value to a list
-        c.append([aT,b_prime[0]])
+        c.append([aT,(b_prime[0] % q)])
     #print(c)
     # convers the list into an array, this is the ciphertext
     ciphertext = np.array(c, dtype='object')
@@ -66,7 +66,36 @@ def encrypt(plaintext, public_key, q):
     return ciphertext
 
 def decrypt(ciphertext, private_key, q):
-    return 1
+    # check that the ciphertext and the private key are compatible sizes?   
+    print(private_key)
+
+    # sets list for pt
+    p = []
+    for val in ciphertext:
+        print(len(val[0]))
+        # turn a' back into a numpy array to allow for the dot product
+        a_prime_T = np.array(val[0])
+        print(a_prime_T)
+        # v = a'T . s, then adding the mod q to it
+        v = np.dot(a_prime_T, private_key) % q
+        print(v % q)
+        # m' = b' -v
+        print(val[1])
+        m_prime = val[1] - v
+        print("m",m_prime[0])
+
+        m = abs(0-m_prime)
+        q_over_2 = abs(0- ((q/2)%q))
+        print(m,q_over_2)
+        print(m-q_over_2)
+
+        if m - q_over_2 <=0:
+            p.append(0)
+        else:
+            p.append(1)
+            
+
+    return p
 
 def crack1(ciphertext, public_key, q):
     return 2
@@ -79,6 +108,8 @@ def crack3(ciphertext, public_key, q):
     
 
 if __name__ == '__main__':
-    res = encrypt(np.array([1,0,1,1,0,1,1,0,1,1,0,0,0,0,0,0,1,0,1,0]), key_gen(300,16,53), 53)
-    print("resulting", len(res))
     # n =16, m =300, q =53
+    #res = encrypt(np.array([1,0,1,1,0,1,1,0,1,1,0,0,0,0,0,0,1,0,1,0]), key_gen(300,16,53), 53)
+    #print("resulting", (res))
+    array = np.array
+    res2 = decrypt(np.array([([23,3,2,3,3,3,3,3,3,33,3,3,4,5,5,6],23), ([23,3,32,3,3,3,3,3,3,33,3,3,4,5,5,6],33)],dtype='object'),key_gen(300,16,53), 53)
