@@ -56,13 +56,15 @@ def encrypt(plaintext, public_key, q):
        # print(pt)
         b_prime += pt
         print("after",b_prime)
+        b_int = b_prime.astype(int)
+        print(b_int)
         # as the value is wrapped in a double set of square brackets, we undo this
-        b_prime_2 = b_prime[0] 
-        print(b_prime_2[0])
-        b_prime_3 = b_prime_2[0]
+        #b_prime_2 = b_prime[0] 
+        #print(b_prime_2[0])
+        #b_prime_3 = b_prime_2[0]
         # appends the array and b value to a list
         print("reaches")
-        c.append([aT_1,(b_prime_3 % q)])
+        c.append([aT_1,(b_int % q)])
         print("goes here")
     print(c)
     # convers the list into an array, this is the ciphertext
