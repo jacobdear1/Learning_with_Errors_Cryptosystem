@@ -3,35 +3,40 @@
 # implementing learning with errors:
 import numpy as np
 import random
-#def key_gen(m,n,q):
+def key_gen(m,n,q):
     # A is a random matrix of size m x n
-
+    A = np.random.randint((q), size=(m,n))
     # s is a random matrix of size n x 1
+    s = np.random.randint((q), size=(n,1))
 
     # e is a matrix of size m x 1 that has random values from either (1,0,-1)
-
-    # calculate b = Axs + e
+    e = np.random.choice([1,0,-1], (m,1))
+    # calculate b = A.s + e
+    b = np.dot(A, s) + e
 
     # A,B pub key
+    public_key = (A,b)
 
     # e is private key
+    #private_key = e
 
+    return public_key
 
 def encrypt(plaintext, public_key, q):
 
     c = []
+    # access the values of A, b from the public key passing in respectively
+    A = public_key[0]
+   # print("A", A.shape)
+    b = public_key[1]
+   # print("b",b.shape)
     # loops through each indivudal bit in the plaintext
     for bit in plaintext:
         print(bit)
-
-        m =4
+        m=300 # find out how to not define this, as this will change?
         # use a different r, generated here for each bit, random integer between 2 and m
         r = random.randint(2,m) # what is m tho?
-        print(r)
-
-        # access the values of A, b from the public key passing in respectively
-        A = public_key[0]
-        b = public_key[1]
+        #print(r)
         
         # generate random vector rT, that is a 1 x len(column A), matrix
         rT = np.random.randint(2, size = (1,len(A)))
@@ -42,20 +47,22 @@ def encrypt(plaintext, public_key, q):
 
         # next perform the dot product using b
         b_prime = np.dot(rT, b)
+       # print("here", b_prime)
         # then add pt * q/2
         #print("before",b_prime)
-        pt = int(bit * (q/2))
-        #print(pt)
+        pt = int(bit * (q/2)) # need to check this, what happens if q is .5, do we floor or ceiling?
+       # print(pt)
         b_prime += pt
-        #print("after",b_prime[0])
+       # print("after",b_prime)
         b_prime = b_prime[0]
-
+       # print(b_prime[0])
         # appends the array and b value to a list
-        c.append([aT,b_prime])
+        c.append([aT,b_prime[0]])
     #print(c)
     # convers the list into an array, this is the ciphertext
-    ciphertext = np.array(c)
+    ciphertext = np.array(c, dtype='object')
    # print(ciphertext)
+    # this will have the same number of values as the ciphertext, as one corresponds to this
     return ciphertext
 
 def decrypt(ciphertext, private_key, q):
@@ -71,5 +78,7 @@ def crack3(ciphertext, public_key, q):
     return 4
     
 
-#if __name__ == '__main__':
-    #res = encrypt(np.array([0,1,1,0,0,1]),(np.array([2,3,4]),[1,1,2]),6)
+if __name__ == '__main__':
+    res = encrypt(np.array([1,0,1,1,0,1,1,0,1,1,0,0,0,0,0,0,1,0,1,0]), key_gen(300,16,53), 53)
+    print("resulting", len(res))
+    # n =16, m =300, q =53
