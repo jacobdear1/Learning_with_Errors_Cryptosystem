@@ -58,5 +58,18 @@ def encrypt(plaintext, public_key, q):
    # print(ciphertext)
     return ciphertext
 
+def decrypt(ciphertext, private_key, q):
+    return 1
+
+def crack1(ciphertext, public_key, q):
+    return 2
+
+def crack2(ciphertext, public_key, q):
+    return 3
+
+def crack3(ciphertext, public_key, q):
+    return 4
+    
+
 #if __name__ == '__main__':
     #res = encrypt(np.array([0,1,1,0,0,1]),(np.array([2,3,4]),[1,1,2]),6)
