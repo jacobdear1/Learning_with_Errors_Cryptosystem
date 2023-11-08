@@ -15,12 +15,12 @@ def key_gen(m,n,q):
     b = np.dot(A, s) + e
 
     # A,B pub key
-    #public_key = (A,b)
+    public_key = (A,b)
 
     # e is private key
     private_key = s
 
-    return private_key
+    return public_key
 
 def encrypt(plaintext, public_key, q):
 
@@ -110,9 +110,9 @@ def crack3(ciphertext, public_key, q):
     return 4
     
 
-if __name__ == '__main__':
+#if __name__ == '__main__':
     # n =16, m =300, q =53
     #res = encrypt(np.array([1,0,1,1,0,1,1,0,1,1,0,0,0,0,0,0,1,0,1,0]), key_gen(300,16,53), 53)
     #print("resulting", (res))
-    array = np.array
-    res2 = decrypt(np.array([([23,3,2,3,3,3,3,3,3,33,3,3,4,5,5,6],23), ([23,3,32,3,3,3,3,3,3,33,3,3,4,5,5,6],33)],dtype='object'),key_gen(300,16,53), 53)
+    #array = np.array
+   # res2 = decrypt(np.array([([23,3,2,3,3,3,3,3,3,33,3,3,4,5,5,6],23), ([23,3,32,3,3,3,3,3,3,33,3,3,4,5,5,6],33)],dtype='object'),key_gen(300,16,53), 53)
