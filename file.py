@@ -102,7 +102,7 @@ def decrypt(ciphertext, private_key, q):
         print(type(b_prime))
         print(b_prime-v)
         m_prime = b_prime - v
-        print("m",m_prime[0])
+        print("m",m_prime)
 
         m = abs(0-m_prime)
         q_over_2 = abs(0-((q/2)%q))
