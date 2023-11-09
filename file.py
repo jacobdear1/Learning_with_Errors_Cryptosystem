@@ -85,18 +85,17 @@ def decrypt(ciphertext, private_key, q):
 
     # sets list for pt
     p = []
-    #for val in ciphertext:
-    for val in range(0, len(ciphertext)):
-        print("val", ciphertext[val][1])
+    for val in ciphertext:
+        print("val", val[1])
         # turn a' back into a numpy array to allow for the dot product
-        a_prime_T = np.array(ciphertext[val][0])
+        a_prime_T = np.array(val[0])
         print("here",a_prime_T)
         # v = a'T . s, then adding the mod q to it
         v = np.dot(a_prime_T, private_key) % q
         print("makes it")
         print(v % q)
         # m' = b' -v
-        b_prime = np.array(ciphertext[val][1])
+        b_prime = np.array(val[1])
         print("b",b_prime)
         print(type(v))
         print(type(b_prime))
@@ -115,7 +114,9 @@ def decrypt(ciphertext, private_key, q):
             p.append(1)
             
     print("p",p)
-    return p
+    p_np = np.array(p)
+    print(p_np)
+    return p_np
 
 def crack1(ciphertext, public_key, q):
     return 2
