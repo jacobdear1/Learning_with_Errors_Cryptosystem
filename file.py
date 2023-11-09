@@ -86,6 +86,7 @@ def decrypt(ciphertext, private_key, q):
     # sets list for pt
     p = []
     for val in ciphertext:
+        print("val", val)
         print(len(val[0]))
         # turn a' back into a numpy array to allow for the dot product
         a_prime_T = np.array(val[0])
@@ -95,9 +96,9 @@ def decrypt(ciphertext, private_key, q):
         print("makes it")
         print(v % q)
         # m' = b' -v
-        print("val",(val[(1)]))
-        #b_prime = val[(1)]
-        m_prime = val[(1)] - v
+        b_prime = np.array(val[1])
+        print("b",b_prime)
+        m_prime = b_prime - v
         print("m",m_prime[0])
 
         m = abs(0-m_prime)
