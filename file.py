@@ -96,8 +96,8 @@ def decrypt(ciphertext, private_key, q):
         print(v % q)
         # m' = b' -v
         print("val",(val[(1)]))
-        b_prime = val[(1)]
-        m_prime = b_prime - v
+        #b_prime = val[(1)]
+        m_prime = val[(1)] - v
         print("m",m_prime[0])
 
         m = abs(0-m_prime)
