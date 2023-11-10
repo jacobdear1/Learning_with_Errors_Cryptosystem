@@ -3,6 +3,8 @@
 # implementing learning with errors:
 import numpy as np
 import random
+from scipy.linalg import solve 
+from sympy import solve_linear_system
 def key_gen(m,n,q):
     # A is a random matrix of size m x n
     A = np.random.randint((q), size=(m,n))
@@ -13,7 +15,6 @@ def key_gen(m,n,q):
     e = np.random.choice([1,0,-1], (m,1))
     # calculate b = A.s + e
     b = (np.dot(A, s) + e) % q
-    print(b)
 
     # A,B pub key
     public_key = (A,b)
@@ -21,7 +22,7 @@ def key_gen(m,n,q):
     # e is private key
     private_key = s
 
-    return private_key
+    return public_key
 
 def encrypt(plaintext, public_key, q):
 
@@ -39,6 +40,8 @@ def encrypt(plaintext, public_key, q):
     # access the values of A, b from the public key passing in respectively
     A = public_key[0]
     b = public_key[1]
+
+    # m = A.shape[0]
 
     # loops through each indivudal bit in the plaintext
     for bit in plaintext:
@@ -80,46 +83,55 @@ def encrypt(plaintext, public_key, q):
     return ciphertext
 
 def decrypt(ciphertext, private_key, q):
-    # check that the ciphertext and the private key are compatible sizes?   
-    print(private_key)
-
     # sets list for pt
     p = []
     for val in ciphertext:
-        print("val", val[1])
         # turn a' back into a numpy array to allow for the dot product
         a_prime_T = np.array(val[0])
-        print("here",a_prime_T)
         # v = a'T . s, then adding the mod q to it
         v = np.dot(a_prime_T, private_key) % q
-        print("makes it")
-        print(v % q)
         # m' = b' -v
+        # turns the integer into a numpy array to allow for operations
         b_prime = np.array(val[1])
-        print("b",b_prime)
-        print(type(v))
-        print(type(b_prime))
-        print(b_prime-v)
-        m_prime = b_prime - v
-        print("m",m_prime)
+        m_prime = (b_prime - v) % q
 
-        m = abs(0-m_prime)
-        q_over_2 = abs(0-((q/2)%q))
-        print(m,q_over_2)
-        print(m-q_over_2)
-
-        if m - q_over_2 <=0:
-            p.append(0)
-        else:
+        if (m_prime > q/4) and (m_prime <(3*q)/4):
             p.append(1)
-            
-    print("p",p)
+        else:
+            p.append(0)
+
     p_np = np.array(p)
-    print(p_np)
     return p_np
 
 def crack1(ciphertext, public_key, q):
-    return 2
+    # see 19.3, breaking lwe:
+    # use svp, to find e, as we have A,b -> solve by enumeration for crack 1 or 2?
+    # look into gram schmdit 
+    # recover shortest vector recovered using lattice reduction
+    
+    # as e is a matrix of all 0s, we are essentially solving the problem As = b.
+    A = public_key[0]
+    b = public_key[1]
+
+    # converts the matrices into the correct shapes to allow for solving of the system
+    # use the value of n which is accessed via A.shape[1]
+    A = A[:A.shape[1]]
+    b = b[:A.shape[1]]
+
+    # change these to the correct fields -> using galios function to make sure integers are returned
+    print(A.shape)
+    s = np.linalg.solve(A,b)
+    print(len(s))
+    print(s)
+    print(np.allclose(np.dot(A,s),b))
+    print(ciphertext)
+
+    # now decrpt this function
+    result = decrypt(ciphertext,s,q)
+    print(result)
+
+
+    return result
 
 def crack2(ciphertext, public_key, q):
     return 3
@@ -127,13 +139,14 @@ def crack2(ciphertext, public_key, q):
 def crack3(ciphertext, public_key, q):
     return 4
     
-
-if __name__ == '__main__':
+#if __name__ == '__main__':
     # n =16, m =300, q =53
     #res = encrypt(np.array([1,0,1,1,0,1,1,0,1,1,0,0,0,0,0,0,1,0,1,0]), key_gen(300,16,53), 53)
     #print("resulting", (res))
 
     #array = np.array
-    res2 = decrypt(np.array([([23,3,2,3,3,3,3,3,3,33,3,3,4,5,5,6],23), ([23,3,32,3,3,3,3,3,3,33,3,3,4,5,5,6],33)],dtype='object'),key_gen(300,16,53), 53)
+    #res2 = decrypt(np.array([([23,3,2,3,3,3,3,3,3,33,3,3,4,5,5,6],23), ([23,3,32,3,3,3,3,3,3,33,3,3,4,5,5,6],33)],dtype='object'),key_gen(300,16,53), 53)
     #for i in res:
     #    print(i)
+
+    #res3 =crack1(np.array([1,0,0,1,0,0,1,0,1,1,0,1,0,1]), key_gen(256,64,491), 491)
