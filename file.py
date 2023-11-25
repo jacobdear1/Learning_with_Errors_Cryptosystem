@@ -3,8 +3,9 @@
 # implementing learning with errors:
 import numpy as np
 import random
-from scipy.linalg import solve 
-from sympy import solve_linear_system
+import galois
+import traceback
+
 def key_gen(m,n,q):
     # A is a random matrix of size m x n
     A = np.random.randint((q), size=(m,n))
@@ -83,63 +84,158 @@ def encrypt(plaintext, public_key, q):
     return ciphertext
 
 def decrypt(ciphertext, private_key, q):
+    # defines the fields to allow for quicker computation in field q
+    gf = galois.GF(q)
     # sets list for pt
     p = []
+    # converts the private key into the galois field
+    private_key = gf(private_key)
     for val in ciphertext:
-        # turn a' back into a numpy array to allow for the dot product
-        a_prime_T = np.array(val[0])
-        # v = a'T . s, then adding the mod q to it
-        v = np.dot(a_prime_T, private_key) % q
+        # converts values into galois field, so no need for mod
+        a_prime_T = gf(val[0])
+        b_prime = gf(val[1])
+        # v = a'T . s
+        v = np.dot(a_prime_T, private_key)
         # m' = b' -v
-        # turns the integer into a numpy array to allow for operations
-        b_prime = np.array(val[1])
-        m_prime = (b_prime - v) % q
+        m_prime = b_prime - v
 
+        # checks if the value is closer to q/2 or 0
         if (m_prime > q/4) and (m_prime <(3*q)/4):
             p.append(1)
         else:
             p.append(0)
 
+    # converts to numpy array for the correct return format
     p_np = np.array(p)
     return p_np
 
 def crack1(ciphertext, public_key, q):
-    # see 19.3, breaking lwe:
-    # use svp, to find e, as we have A,b -> solve by enumeration for crack 1 or 2?
-    # look into gram schmdit 
-    # recover shortest vector recovered using lattice reduction
-    
     # as e is a matrix of all 0s, we are essentially solving the problem As = b.
-    A = public_key[0]
-    b = public_key[1]
+    # splits public key down into its components, A and b
+    A = (public_key[0])
+    #print(A.properties)
+    b = (public_key[1])
+
+
+    # use galois to help create a fieldarray sublcass to work in the specific finite feild
+    gf = galois.GF(q)
+
+    # convert A and b into galois fields to allow for the correct solving of s
+    A = gf(A)
+    b = gf(b)
 
     # converts the matrices into the correct shapes to allow for solving of the system
     # use the value of n which is accessed via A.shape[1]
     A = A[:A.shape[1]]
     b = b[:A.shape[1]]
 
-    # change these to the correct fields -> using galios function to make sure integers are returned
-    print(A.shape)
+    # solve the linear system of equations As=b, giving us the value of s,the secret key
+    # in the galois field
     s = np.linalg.solve(A,b)
-    print(len(s))
-    print(s)
-    print(np.allclose(np.dot(A,s),b))
-    print(ciphertext)
+    # Convert the solution back to integers, to allow for decryption
+    s_int = s.astype(np.int32)
 
     # now decrpt this function
-    result = decrypt(ciphertext,s,q)
-    print(result)
-
-
+    result = decrypt(ciphertext,s_int,q)
+   # print("res",result)
     return result
 
 def crack2(ciphertext, public_key, q):
+    # see 19.3, breaking lwe:
+    # use svp, to find e, as we have A,b -> solve by enumeration for crack 1 or 2?
+    # look into gram schmdit 
+    # recover shortest vector recovered using lattice reduction
+
+    # define galois field
+    gf = galois.GF(q)
+
+    # intepret A and b from the public_key
+    A = public_key[0]
+    b = public_key[1]
+
+    # convert A and b into the galois field, to allow for mod q operations
+    A = gf(A)
+    b = gf(b)
+    print(A.shape)
+    print(b)
+
+    # lattice needs to be a square matrix of nxn
+    #lattice = np.column_stack((A, b))
+   # print(lattice.shape)
+    
+    #print('here',lattice[A.shape[1]:])
+    #val = lattice[1][:A.shape[1]]
+    #print(lattice[1][:A.shape[1]])
+
+    #print(val == b)
+
+    # first we need to construct a lattice basis -> need to work out how to extract the matrices of A to construct one 
+    #B = np.block([[A, np.eye(len(A))],
+      #            [np.zeros_like(A), np.eye(len(A))]])
+    
+    #print(B)
+    #print(B.shape)
+    #v = np.concatenate([b.reshape(-1, 1), np.zeros((len(b), 1))], axis=1)
+    #v = v.flatten()
+    #print(B)
+    #print(v)
+
+        # creates a lattice basis
+    # Create the bottom row [0, 0, ..., 1]
+    # create n+1 zeros, and then n+1 = -1, under b
+    bottom_row = np.zeros((1,A.shape[1] + 1))
+    print(bottom_row)
+    # last value of row will be 1, which represents b
+    bottom_row[0,-1] = 1
+    print(bottom_row)
+    
+    # Combine matrix A, vector b, and the bottom row
+    # first n columns =  A, n +1 column = 1
+    # bottom row is n 0s and then a 1 on the end
+    # allows for the concatenation of A and b, and then has them vertically
+    lattice = np.vstack((np.column_stack((A, b)), bottom_row))
+    print("lat", lattice)
+
     return 3
 
 def crack3(ciphertext, public_key, q):
+    
+    # use svp, to find e, as we have A,b -> solve by enumeration for crack 1 or 2?
+    # look into gram schmdit 
+    # recover shortest vector recovered using lattice reduction
+
+    # define galois field
+    gf = galois.GF(q)
+
+    # intepret A and b from the public_key
+    A = public_key[0]
+    b = public_key[1]
+
+    # convert A and b into the galois field, to allow for mod q operations
+    A = gf(A)
+    b = gf(b)
+    print(A)
+    print(b.T)
+
+    # creates a lattice basis
+    # Create the bottom row [0, 0, ..., 1]
+    # create n+1 zeros, and then n+1 = -1, under b
+    bottom_row = np.zeros((1,A.shape[1] + 1))
+    print(bottom_row)
+    # last value of row will be 1, which represents b
+    bottom_row[0,-1] = 1
+    print(bottom_row)
+    
+    # Combine matrix A, vector b, and the bottom row
+    # first n columns =  A, n +1 column = 1
+    # bottom row is n 0s and then a 1 on the end
+    # allows for the concatenation of A and b, and then has them vertically
+    lattice = np.vstack((np.column_stack((A, b)), bottom_row))
+    print("lat", lattice)
+
     return 4
     
-#if __name__ == '__main__':
+if __name__ == '__main__':
     # n =16, m =300, q =53
     #res = encrypt(np.array([1,0,1,1,0,1,1,0,1,1,0,0,0,0,0,0,1,0,1,0]), key_gen(300,16,53), 53)
     #print("resulting", (res))
@@ -149,4 +245,6 @@ def crack3(ciphertext, public_key, q):
     #for i in res:
     #    print(i)
 
-    #res3 =crack1(np.array([1,0,0,1,0,0,1,0,1,1,0,1,0,1]), key_gen(256,64,491), 491)
+    res4 =crack2(np.array([1,0,0,1,0,0,1,0,1,1,0,1,0,1]), key_gen(256,64,491), 491)
+
+    #res5 = crack3(np.array([1,0,0,1,0,0,1,0,1,1,0,1,0,1]), key_gen(48,5,19),19)
