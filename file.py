@@ -1,6 +1,6 @@
 # this file will contain all of the functions specified to implement and then attack learning with errors
 
-# implementing learning with errors:
+# time and math are standard libraries, numpy and galois allowed.
 import numpy as np
 import galois
 import time
@@ -17,30 +17,30 @@ def key_gen(m,n,q):
 
     # use this if we wanted to simulate the learning with few errors for crack2
     # Initialize the array with zeros
-    e_3 = np.zeros((m, 1), dtype=int)
+    e_1 = np.zeros((m, 1), dtype=int)
 
     # Randomly select two indices for 1 and -1 separately
     indices_ones = np.random.choice(m, size=2, replace=False)
     indices_neg_ones = np.random.choice(np.setdiff1d(np.arange(m), indices_ones), size=2, replace=False)
 
     # Assign 1 to the selected indices for 1 and -1
-    e_3[indices_ones] = 1
-    e_3[indices_neg_ones] = -1
+    e_1[indices_ones] = 1
+    e_1[indices_neg_ones] = -1
 
     # use this if we wanted to simulate the learning with few errors for crack3, as
-    # has half 0s, and then a quater of 1s, -1s
+    # has half 0s, and then a quarter of 1s, -1s
     # Initialize the array with zeros
-    e_4 = np.zeros((m, 1), dtype=int)
+    e_2 = np.zeros((m, 1), dtype=int)
 
     # Randomly select two indices for 1 and -1 separately
     indices_ones = np.random.choice(m, size=int(m/4), replace=False)
     indices_neg_ones = np.random.choice(np.setdiff1d(np.arange(m), indices_ones), size=int(m/4), replace=False)
 
     # Assign 1 to the selected indices for 1 and -1
-    e_4[indices_ones] = 1
-    e_4[indices_neg_ones] = -1
+    e_2[indices_ones] = 1
+    e_2[indices_neg_ones] = -1
     # calculate b = A.s + e
-    b = (np.dot(A, s) + e_4) % q
+    b = (np.dot(A, s) + e_2) % q
     # A,B pub key
     public_key = (A,b)
 
@@ -64,18 +64,11 @@ def encrypt(plaintext, public_key, q):
     b_values = []
 
     # access the values of A, b from the public key passing in respectively
-    A = public_key[0]
-    b = public_key[1]
+    A,b = public_key
 
-    # m = A.shape[0]
 
     # loops through each indivudal bit in the plaintext
     for bit in plaintext:
-        # not sure these are necessary!
-        #m=300 # find out how to not define this, as this will change?
-        # use a different r, generated here for each bit, random integer between 2 and m
-        #r = random.randint(2,m) # what is m tho?
-        
         # generate random vector rT, that is a 1 x len(column A), matrix
         rT = np.random.randint(2, size = (1,len(A)))
 
@@ -86,6 +79,7 @@ def encrypt(plaintext, public_key, q):
         # appends to list, that allows us to read into numpy array
         s_arrays.append(aT_1)
 
+        # next perform the dot product using b, then add pt * q/2, in galois field, so will be mod q
         # next perform the dot product using b
         b_prime = np.dot(rT, b)
         # then add pt * q/2
@@ -117,7 +111,7 @@ def decrypt(ciphertext, private_key, q):
     private_key = gf(private_key)
     for val in ciphertext:
         # converts values into galois field, so no need for mod
-        a_prime_T = gf(val[0]%q) # remove this modq when we process it
+        a_prime_T = gf(val[0]%q)
         b_prime = gf(val[1])
         # v = a'T . s
         v = np.dot(a_prime_T, private_key)
@@ -137,9 +131,7 @@ def decrypt(ciphertext, private_key, q):
 def crack1(ciphertext, public_key, q):
     # as e is a matrix of all 0s, we are essentially solving the problem As = b.
     # splits public key down into its components, A and b
-    A = (public_key[0])
-    #print(A.properties)
-    b = (public_key[1])
+    A, b = public_key
 
 
     # use galois to help create a fieldarray sublcass to work in the specific finite feild
@@ -161,19 +153,17 @@ def crack1(ciphertext, public_key, q):
     s_int = s.astype(np.int32)
     
     # now decrypt this function
-    result = decrypt(ciphertext,s_int,q)
-    return result
+    res = decrypt(ciphertext,s_int,q)
+    return res
 
 def crack2(ciphertext, public_key, q):
     # define galois field
     gf = galois.GF(q)
 
     # intepret A and b from the public_key
-    A = public_key[0]
-    b = public_key[1]
+    A, b = public_key
 
-    n = A.shape[1]
-    m = A.shape[0]
+    m, n = A.shape
 
     # while loop until we find the condition where num_errors = 4, as we know the system
     # has exactly 2 1s and 2 -1s, so this will produce 4 errors
@@ -279,8 +269,6 @@ def crack3(ciphertext, public_key, q):
     res = decrypt(ciphertext, shortest_vector, q)
     return res
                 
-
-
 if __name__ == '__main__':
     # n =16, m =300, q =53
     #res = encrypt(np.array([1,0,1,1,0,1,1,0,1,1,0,0,0,0,0,0,1,0,1,0]), key_gen(300,16,53), 53)
@@ -294,7 +282,7 @@ if __name__ == '__main__':
     #res4 =crack2(np.array([1,0,0,1,0,0,1,0,1,1,0,1,0,1]), key_gen(256,64,491), 491)
     a = [1,1,1,1,0,1,0,0,1,1,1,0,0,1,1,1,1,0,1,0]
     q = 19
-    key, sval= key_gen(48,5,q)
+    key, sval= key_gen(48,2,q)
     print(sval)
     ciphertext = encrypt(a, key,q)
     start = time.time()
